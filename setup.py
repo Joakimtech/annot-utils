@@ -11,6 +11,7 @@ setup(
         "shapely>=2.0.0",
         "Pillow>=10.0.0",
         "click>=8.1.0",
+        "scikit-learn>=1.3.0",
     ],
     entry_points={
         "console_scripts": [
