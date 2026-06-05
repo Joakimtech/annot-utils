@@ -38,3 +38,29 @@ pip install -e .
 
 # Or install with pip directly
 pip install annot-utils
+
+## Create .github/workflows/test.yml for CI/CD
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, 3.10, 3.11]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        pip install -e .
+        pip install pytest pytest-cov
+    - name: Run tests
+      run: |
+        pytest tests/ --cov=annot_utils
