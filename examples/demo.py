@@ -52,7 +52,7 @@ def demo():
     from annot_utils import __version__
     print(f"   ✅ Version {__version__}")
     
-    print("\n✨ Demo complete! annot-utils is ready for use.\n")
+    print("\n Demo complete! annot-utils is ready for use.\n")
     print("Quick start commands:")
     print("  annot-utils convert --help")
     print("  annot-utils validate --help")
