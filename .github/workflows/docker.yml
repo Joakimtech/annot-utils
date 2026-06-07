@@ -3,33 +3,28 @@ name: Build Docker Image
 on:
   push:
     branches: [ main, master ]
-    tags:
-      - 'v*'
   pull_request:
     branches: [ main, master ]
 
 jobs:
-  docker:
+  # Simple Docker build test - no push to registry
+  docker-build-test:
     runs-on: ubuntu-latest
-    # Only run on main branch or tags
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
+    name: Test Docker build
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-      
+    - name: List files (debug)
+      run: |
+        ls -la
+        echo "Checking if Dockerfile exists:"
+        test -f Dockerfile && echo "✅ Dockerfile found" || echo "❌ Dockerfile missing"
+        
     - name: Build Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: false  # Don't push, just test build
-        load: true
-        tags: annot-utils:test
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      run: |
+        docker build -t annot-utils:test .
         
     - name: Test Docker image
       run: |
