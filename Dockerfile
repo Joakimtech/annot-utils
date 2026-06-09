@@ -2,24 +2,19 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements and install Python dependencies
+# Copy only necessary files first (for better caching)
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY setup.py .
+COPY README.md .
+COPY annot_utils/ annot_utils/
 
-# Copy package
-COPY . .
-RUN pip install -e .
+# Install dependencies
+RUN pip install --no-cache-dir -e .
 
 # Create non-root user
 RUN useradd -m -s /bin/bash annotuser && chown -R annotuser:annotuser /app
 USER annotuser
 
-# Entry point
+# Set entrypoint
 ENTRYPOINT ["annot-utils"]
 CMD ["--help"]
