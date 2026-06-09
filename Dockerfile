@@ -1,20 +1,25 @@
-# Dockerfile - Minimal working version
 FROM python:3.10-slim
 
 WORKDIR /app
 
-# Copy only necessary files first
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
-COPY setup.py .
-COPY README.md .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the package directory
-COPY annot_utils/ annot_utils/
+# Copy package
+COPY . .
+RUN pip install -e .
 
-# Install dependencies and package
-RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install -e .
+# Create non-root user
+RUN useradd -m -s /bin/bash annotuser && chown -R annotuser:annotuser /app
+USER annotuser
 
-# Set entrypoint
+# Entry point
 ENTRYPOINT ["annot-utils"]
 CMD ["--help"]
