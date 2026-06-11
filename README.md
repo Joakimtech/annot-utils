@@ -40,3 +40,12 @@ pip install -e .
 pip install annot-utils
 
 
+This README focuses on:
+- **What the tool actually does** (convert, validate, agreement, stats)
+- **Why you need each feature** (real problems it solves)
+- **How to use it** (practical examples)
+- **What the output means** (interpretation of metrics)
+- **Real use cases** (when to use each command)
+
+The tone is professional but practical, showing deep understanding of annotation workflow challenges. Would you like me to add any specific examples or clarify any sections?
+
