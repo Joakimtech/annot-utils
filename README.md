@@ -1,456 +1,498 @@
+# annot-utils
+A Python CLI tool for converting between annotation formats (COCO ↔ YOLO), validating label quality, and calculating inter-annotator agreement. Perfect for data annotation teams and computer vision workflows
 
-#  annot-utils
 
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-linux%20%7C%20windows%20%7C%20macos-lightgrey)](https://github.com/joakimtech/annot-utils)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Tests](https://github.com/joakimtech/annot-utils/workflows/Tests/badge.svg)](https://github.com/joakimtech/annot-utils/actions)
+[![PyPI version](https://badge.fury.io/py/annot-utils.svg)](https://badge.fury.io/py/annot-utils)
 
-> **A professional command-line toolkit for computer vision annotation workflows**  
-> Convert between formats, validate annotation quality, measure inter-annotator agreement, and generate detailed statistics.
+A professional command-line toolkit for computer vision annotation workflows. Convert between annotation formats, validate label quality, measure inter-annotator agreement, and generate comprehensive statistics.
 
-Built by [joakimtech](https://github.com/joakimtech) as part of a comprehensive data annotation portfolio.
+## Table of Contents
 
-## 📋 Table of Contents
-
-- [Why This Tool?](#why-this-tool)
+- [Overview](#overview)
 - [Features](#features)
+- [Installation](#installation)
 - [Quick Start](#quick-start)
-- [Command Reference](#command-reference)
+- [Commands Reference](#commands-reference)
+  - [Convert](#convert)
+  - [Validate](#validate)
+  - [Agreement](#agreement)
+  - [Statistics](#statistics)
 - [Use Cases](#use-cases)
-- [Integration with Other Tools](#integration-with-other-tools)
-- [Performance](#performance)
-- [CI/CD & Testing](#cicd--testing)
+- [API Reference](#api-reference)
+- [Benchmarks](#benchmarks)
 - [Contributing](#contributing)
 - [License](#license)
 
-## 🤔 Why This Tool?
+## Overview
 
-Computer vision projects often involve messy annotation workflows:
+Data annotation is a critical step in computer vision projects, but working with different annotation formats and ensuring quality can be challenging. annot-utils solves these problems by providing:
 
-- ❌ **Format incompatibility** - Your annotation tool exports COCO but your model expects YOLO
-- ❌ **Quality issues** - Boxes outside image boundaries, invalid coordinates
-- ❌ **Annotator inconsistency** - No way to measure agreement between team members
-- ❌ **No validation** - Training fails hours into training due to bad annotations
+- Bidirectional conversion between COCO JSON and YOLO txt formats
+- Comprehensive validation to catch annotation errors before training
+- Statistical analysis to measure inter-annotator consistency
+- Detailed reporting for quality assurance
 
-**annot-utils solves these problems** with a simple, reliable CLI tool that works on Linux, Windows, and macOS.
+The tool is designed for machine learning engineers, data scientists, and annotation teams who need reliable, automated annotation processing.
 
-## ✨ Features
+## Features
 
-| Feature | Description | Command |
-|---------|-------------|---------|
-| 🔄 **Format Conversion** | Bidirectional COCO ↔ YOLO with batch processing | `annot-utils convert` |
-| ✓ **Validation** | 8+ quality checks with HTML reports | `annot-utils validate` |
-| 📊 **Agreement Analysis** | Cohen's Kappa, IoU matching, F1 scores | `annot-utils agreement` |
-| 📈 **Statistics** | Dataset distribution and box metrics | `annot-utils stats` |
-| 🎨 **HTML Reports** | Beautiful, shareable validation reports | `--html` flag |
-| 🚀 **Batch Processing** | Convert entire datasets in one command | Directory input |
-| 🔧 **Multi-OS Support** | Linux, Windows, macOS | CI/CD tested |
+| Feature | Description |
+|---------|-------------|
+| Format Conversion | Convert between COCO and YOLO formats while preserving all annotation data |
+| Batch Processing | Process entire datasets with a single command |
+| Validation | Check for boundary violations, size issues, aspect ratio problems, and overlaps |
+| HTML Reports | Generate shareable validation reports with visual summaries |
+| Agreement Analysis | Calculate Cohen's Kappa, precision, recall, F1 scores, and mean IoU between annotators |
+| Statistics Generation | Produce detailed dataset statistics including class distributions and box metrics |
+| Cross-Platform | Works on Linux, Windows, and macOS |
+| Docker Support | Run in containerized environments for reproducibility |
 
-### Validation Checks Performed
+## Installation
 
-| Check | Description | Severity |
-|-------|-------------|----------|
-| Boundary violation | Box extends beyond image | ❌ Error |
-| Negative coordinates | x, y, w, h less than 0 | ❌ Error |
-| Invalid category | Category ID not in class list | ❌ Error |
-| Missing image file | Referenced image not found | ⚠️ Warning |
-| Box too small | Area < 100px (configurable) | ⚠️ Warning |
-| Extreme aspect ratio | Width/height > 10:1 | ⚠️ Warning |
-| Significant overlap | IoU > 0.5 between boxes | ℹ️ Info |
-| No annotations | Image has zero annotations | ℹ️ Info |
-
-## 🚀 Quick Start
-
-### Installation
+### From PyPI
 
 ```bash
-# Clone the repository
+pip install annot-utils
+```
+
+### From Source
+
+```bash
 git clone https://github.com/joakimtech/annot-utils.git
 cd annot-utils
-
-# Install in development mode
 pip install -e .
-
-# Or install directly from GitHub
-pip install git+https://github.com/joakimtech/annot-utils.git
 ```
 
-### 60-Second Demo
+### Using Docker
 
 ```bash
-# 1. Convert COCO to YOLO
-annot-utils convert --from coco --to yolo --input annotations.json --output ./yolo/
-
-# 2. Validate your annotations
-annot-utils validate --format coco --annotations annotations.json --images ./images/
-
-# 3. Check agreement between annotators
-annot-utils agreement --format coco --annotator1 user1.json --annotator2 user2.json
+docker pull joakimtech/annot-utils:latest
+docker run joakimtech/annot-utils --help
 ```
 
-## 📚 Command Reference
-
-### 1. Convert Annotations
+### Verification
 
 ```bash
-annot-utils convert --from <coco|yolo> --to <coco|yolo> --input <path> --output <path> [options]
+annot-utils --version
+annot-utils --help
 ```
 
-#### COCO → YOLO
+## Quick Start
+
+Convert COCO annotations to YOLO format:
+
+```bash
+annot-utils convert --from coco --to yolo --input annotations.json --output ./yolo_labels/
+```
+
+Validate annotations before training:
+
+```bash
+annot-utils validate --format coco --annotations labels.json --images ./images/
+```
+
+Measure agreement between two annotators:
+
+```bash
+annot-utils agreement --format coco --annotator1 annotator_a.json --annotator2 annotator_b.json
+```
+
+## Commands Reference
+
+### Convert
+
+Convert annotations between COCO and YOLO formats.
+
+#### COCO to YOLO
 
 ```bash
 annot-utils convert \
   --from coco \
   --to yolo \
-  --input dataset.json \
-  --output ./yolo_annotations/
+  --input annotations.json \
+  --output ./yolo_annotations/ \
+  --quiet
 ```
 
-**What happens:**
-- Reads COCO JSON file
-- Normalizes coordinates to 0-1 range
-- Creates one .txt file per image
-- Generates `class_mapping.json` with class IDs
+**Output:**
+- Individual txt files for each image in YOLO format
+- class_mapping.json file mapping class IDs to names
 
-#### YOLO → COCO
+#### YOLO to COCO
 
 ```bash
 annot-utils convert \
   --from yolo \
   --to coco \
   --input ./yolo_annotations/ \
-  --output coco_output.json \
+  --output coco_annotations.json \
   --image-dir ./images/ \
   --class-names cat,dog,bird
 ```
 
-**Class names options:**
-- Comma-separated: `--class-names cat,dog,bird`
-- File-based: `--class-names classes.txt` (one per line)
+**Class Names Options:**
+- Comma-separated list: `--class-names cat,dog,bird`
+- File with one class per line: `--class-names classes.txt`
 
-### 2. Validate Annotations
+#### Batch Conversion
+
+Convert multiple COCO files in a directory:
 
 ```bash
-annot-utils validate --format <coco|yolo> --annotations <path> --images <dir> [options]
+for file in ./coco_annotations/*.json; do
+  annot-utils convert \
+    --from coco --to yolo \
+    --input "$file" \
+    --output "./yolo_${file%.json}/"
+done
 ```
 
+### Validate
+
+Check annotation quality and integrity.
+
+#### Basic Validation
+
 ```bash
-# Basic validation
 annot-utils validate \
   --format coco \
-  --annotations labels.json \
-  --images ./dataset/images/
+  --annotations annotations.json \
+  --images ./images/ \
+  --output validation_report.html
+```
 
-# Strict validation with custom thresholds
+#### Validation with Custom Thresholds
+
+```bash
 annot-utils validate \
   --format coco \
   --annotations labels.json \
   --images ./images/ \
   --min-box-size 500 \
   --max-aspect-ratio 5.0 \
-  --strict \
-  --output validation_report.html
+  --strict
 ```
 
-**Example output:**
-```
-🔍 Validating COCO annotations...
+#### Validation Checks Performed
 
-📊 Validation Summary:
-   Total Images: 150
-   Total Annotations: 2,340
-   Errors: 12 ❌
-   Warnings: 45 ⚠️
-   Info: 8 ℹ️
-   Quality Score: 87.3/100
+| Check | Description |
+|-------|-------------|
+| Boundary | Box coordinates within image dimensions |
+| Size | Minimum and maximum box area limits |
+| Aspect Ratio | Width/height ratio within acceptable range |
+| Overlap | Significant overlap detection between boxes |
+| File Existence | Image files exist for all annotations |
+| Category Validity | Category IDs match defined classes |
 
-❌ Sample errors:
-   • Box extends beyond image boundaries (image_042.jpg)
-   • Invalid category ID: 99 (image_123.jpg)
+#### Validation Report Output
 
-📄 HTML report saved to: validation_report.html
-```
+The validation command generates a detailed report including:
 
-### 3. Calculate Inter-Annotator Agreement
+- Total images and annotations processed
+- Count of errors, warnings, and informational messages
+- Quality score from 0 to 100
+- Distribution of box sizes and aspect ratios
+- List of all issues with locations
+- HTML visualization for easy sharing
+
+### Agreement
+
+Calculate inter-annotator agreement metrics.
+
+#### COCO Format Agreement
 
 ```bash
-annot-utils agreement --format <coco|yolo> --annotator1 <path> --annotator2 <path> [options]
-```
-
-```bash
-# Compare two annotators
 annot-utils agreement \
   --format coco \
-  --annotator1 junior_annotator.json \
-  --annotator2 senior_annotator.json \
-  --iou-threshold 0.5 \
-  --output agreement_report.txt
+  --annotator1 annotator_A.json \
+  --annotator2 annotator_B.json \
+  --output agreement_report.txt \
+  --iou-threshold 0.5
 ```
 
-**Example output:**
-```
-📊 Agreement Summary:
-├─ Cohen's Kappa: 0.742
-├─ Precision: 0.856 (187/218)
-├─ Recall: 0.823 (187/227)
-├─ F1 Score: 0.839
-├─ Matched Pairs: 187
-├─ Mean IoU: 0.723
-└─ Quality: Good agreement 👍
-
-📈 Interpretation:
-   ✅ Good agreement - Annotations are reliable
-   ✅ Strong categorical agreement beyond chance
-
-Per-Class Performance:
-   CAT:
-   ├─ Precision: 0.890
-   ├─ Recall: 0.865
-   ├─ F1 Score: 0.877
-   └─ Mean IoU: 0.751
-```
-
-### 4. Generate Statistics
+#### YOLO Format Agreement
 
 ```bash
-annot-utils stats --format <coco|yolo> --input <path> --output <json>
+annot-utils agreement \
+  --format yolo \
+  --annotator1 ./user1_labels/ \
+  --annotator2 ./user2_labels/ \
+  --image-dir ./images/ \
+  --class-names classes.txt \
+  --iou-threshold 0.5
 ```
+
+#### Agreement Metrics Explained
+
+| Metric | Description | Range |
+|--------|-------------|-------|
+| Cohen's Kappa | Agreement beyond chance | -1 to 1 |
+| Precision | Matched boxes / Annotator 1 total | 0 to 1 |
+| Recall | Matched boxes / Annotator 2 total | 0 to 1 |
+| F1 Score | Harmonic mean of precision and recall | 0 to 1 |
+| Mean IoU | Average overlap of matched boxes | 0 to 1 |
+
+#### Kappa Interpretation Guide
+
+| Kappa Value | Agreement Level |
+|-------------|-----------------|
+| 0.81 - 1.00 | Almost perfect |
+| 0.61 - 0.80 | Substantial |
+| 0.41 - 0.60 | Moderate |
+| 0.21 - 0.40 | Fair |
+| 0.00 - 0.20 | Slight |
+
+### Statistics
+
+Generate comprehensive dataset statistics.
 
 ```bash
 annot-utils stats \
   --format coco \
-  --input dataset.json \
-  --output dataset_stats.json
+  --input annotations.json \
+  --output stats.json
 ```
 
-## 🎯 Use Cases
+#### Statistics Output Example
 
-### Case Study 1: Preparing Data for YOLO Training
-
-```bash
-# Your annotation tool exported COCO, but YOLOv8 expects YOLO format
-annot-utils convert --from coco --to yolo --input custom_data.json --output ./yolo_dataset/
-
-# Validate before spending GPU hours
-annot-utils validate --format yolo --annotations ./yolo_dataset/ --images ./images/ --strict
-
-# Check class distribution
-annot-utils stats --format yolo --input ./yolo_dataset/ --output stats.json
+```json
+{
+  "format": "COCO",
+  "total_images": 150,
+  "total_annotations": 2340,
+  "total_categories": 5,
+  "categories": {
+    "cat": 845,
+    "dog": 723,
+    "bird": 412,
+    "car": 210,
+    "person": 150
+  },
+  "bbox_statistics": {
+    "mean_area": 12450.5,
+    "std_area": 3420.2,
+    "min_area": 450,
+    "max_area": 125000,
+    "mean_aspect_ratio": 1.23
+  }
+}
 ```
 
-### Case Study 2: Quality Assurance Pipeline
+## Use Cases
+
+### 1. Data Preparation for Model Training
+
+Convert annotation formats to match your training pipeline requirements:
 
 ```bash
-#!/bin/bash
-# CI script for annotation QA
-
-echo "Running annotation validation..."
-
-# Validate with strict mode (fails if issues found)
-annot-utils validate \
-  --format coco \
-  --annotations $CI_ANNOTATION_PATH \
-  --images $CI_IMAGE_PATH \
-  --strict \
-  --output qa_report.html
-
-# If validation passes, convert for training
-if [ $? -eq 0 ]; then
-    annot-utils convert \
-      --from coco --to yolo \
-      --input $CI_ANNOTATION_PATH \
-      --output ./ready_for_training/
-    echo "✅ Annotations ready for training!"
-else
-    echo "❌ Validation failed. Please fix annotations."
-    exit 1
-fi
+annot-utils convert --from coco --to yolo --input custom.json --output ./yolo/
 ```
 
-### Case Study 3: Annotator Performance Review
+### 2. Quality Assurance Before Training
+
+Validate annotations to prevent wasted compute resources on bad data:
 
 ```bash
-# Monthly annotator agreement check
-for annotator in team_member_*.json; do
-    annot-utils agreement \
+annot-utils validate --format yolo --annotations ./labels/ --images ./images/ --strict
+```
+
+### 3. Annotator Performance Evaluation
+
+Measure consistency between team members:
+
+```bash
+annot-utils agreement --annotator1 junior.json --annotator2 senior.json
+```
+
+### 4. Dataset Analysis and Understanding
+
+Analyze class distributions and box statistics:
+
+```bash
+annot-utils stats --input dataset.json --output analysis.json
+```
+
+### 5. Continuous Integration for Annotation Quality
+
+Integrate validation into CI/CD pipelines:
+
+```yaml
+# GitHub Actions example
+- name: Validate Annotations
+  run: |
+    annot-utils validate \
       --format coco \
-      --annotator1 "$annotator" \
-      --annotator2 gold_standard.json \
-      --output "reports/agreement_${annotator}.txt"
-done
-
-# Generate team summary
-echo "Team Agreement Scores:"
-grep "F1 Score" reports/agreement_*.txt
+      --annotations $ANNOTATION_PATH \
+      --images ./images/ \
+      --strict
 ```
 
-## 🔗 Integration with Other Tools
+## API Reference
 
-### Part of a Complete Annotation Portfolio
-
-This tool is one of three annotation projects by [joakimtech](https://github.com/joakimtech):
-
-| Project | Description | Tech Stack |
-|---------|-------------|------------|
-| **annot-utils** (this tool) | CLI conversion & validation | Python, Click, Shapely |
-| [Annotation Tool](https://github.com/joakimtech/annotation-tool) | Web-based bounding box annotation | Streamlit, OpenCV |
-| [Weak Supervision Pipeline](https://github.com/joakimtech/weak-supervision) | Automated labeling with Snorkel | Snorkel, spaCy, NLP |
-
-### Workflow Example: Complete Annotation Pipeline
+### Python API Usage
 
 ```python
-# complete_pipeline.py
-"""
-End-to-end annotation workflow using all 3 tools:
-1. Annotate with Streamlit tool
-2. Validate and convert with annot-utils
-3. Train model using weak supervision
-"""
+from annot_utils import AnnotationConverter, AnnotationValidator, AgreementCalculator
 
-import subprocess
-from annot_utils.validator import AnnotationValidator
-from annot_utils.converter import AnnotationConverter
+# Convert annotations
+converter = AnnotationConverter(verbose=True)
+stats = converter.coco_to_yolo("annotations.json", "./yolo_output/")
 
-def run_complete_pipeline():
-    print("🎯 Complete Annotation Pipeline")
-    
-    # Step 1: Launch annotation tool
-    print("\n1️⃣ Launching annotation tool...")
-    # subprocess.run(["streamlit", "run", "annotation_tool/app.py"])
-    
-    # Step 2: Validate annotations
-    print("\n2️⃣ Validating annotations...")
-    validator = AnnotationValidator()
-    report = validator.validate_coco("exports/annotations.json", "./images/")
-    
-    if report.quality_score < 80:
-        print(f"⚠️ Quality score {report.quality_score} - Review needed")
-        return
-    
-    # Step 3: Convert format
-    print("\n3️⃣ Converting to YOLO format...")
-    converter = AnnotationConverter()
-    converter.coco_to_yolo("exports/annotations.json", "./yolo_data/")
-    
-    # Step 4: Generate statistics
-    print("\n4️⃣ Generating dataset statistics...")
-    subprocess.run([
-        "annot-utils", "stats",
-        "--format", "coco",
-        "--input", "exports/annotations.json",
-        "--output", "dataset_stats.json"
-    ])
-    
-    print("\n✅ Pipeline complete! Ready for model training.")
+# Validate annotations
+validator = AnnotationValidator(min_box_size=100, max_aspect_ratio=10.0)
+report = validator.validate_coco("annotations.json", "./images/")
+print(f"Quality Score: {report.quality_score}/100")
 
-if __name__ == "__main__":
-    run_complete_pipeline()
+# Calculate agreement
+calculator = AgreementCalculator(iou_threshold=0.5)
+metrics = calculator.calculate_coco_agreement("annotator1.json", "annotator2.json")
+print(metrics.summary())
 ```
 
-## 📊 Performance
+### Configuration Options
 
-Benchmark results on standard hardware (Intel i7-10750H, 16GB RAM):
+#### AnnotationValidator Parameters
 
-| Operation | 100 images (1k boxes) | 1k images (10k boxes) | 10k images (100k boxes) |
-|-----------|----------------------|----------------------|------------------------|
-| COCO→YOLO | 0.3s | 2.1s | 18s |
-| YOLO→COCO | 0.4s | 2.5s | 22s |
-| Validation | 0.5s | 3.2s | 28s |
-| Agreement | 0.2s | 1.8s | 15s |
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| min_box_size | 100 | Minimum allowed box area in pixels |
+| max_box_size_ratio | 0.95 | Maximum box area as fraction of image |
+| max_aspect_ratio | 10.0 | Maximum width/height ratio allowed |
+| min_confidence | 0.0 | Minimum confidence score threshold |
 
-**Optimized for:**
-- ✅ Large datasets (tested with 100k+ annotations)
-- ✅ Memory efficiency (streams large files)
-- ✅ Parallel processing support
+#### AgreementCalculator Parameters
 
-## 🖥️ CI/CD & Testing
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| iou_threshold | 0.5 | Minimum IoU for box matching |
 
-This project is continuously tested on:
+## Benchmarks
 
-### Operating Systems
-| OS | Version | Status |
-|----|---------|--------|
-| Ubuntu | 20.04, 22.04, 24.04 | ✅ |
-| Windows | Server 2019, 2022, 11 | ✅ |
-| macOS | Monterey, Ventura, Sonoma | ✅ |
+Performance results on standard hardware (Intel i7-10750H, 16GB RAM):
 
-### Python Versions
-| Version | Status |
-|---------|--------|
-| 3.8 | ✅ |
-| 3.9 | ✅ |
-| 3.10 | ✅ |
-| 3.11 | ✅ |
-| 3.12 | ✅ |
+| Dataset Size | Conversion Time | Validation Time | Agreement Time |
+|-------------|----------------|-----------------|----------------|
+| 100 images (1k boxes) | 0.3s | 0.5s | 0.2s |
+| 1,000 images (10k boxes) | 2.1s | 3.2s | 1.8s |
+| 10,000 images (100k boxes) | 18s | 28s | 15s |
 
-### Test Coverage
-```
-annot_utils/
-├── converter.py    95% coverage
-├── validator.py    92% coverage
-├── agreement.py    89% coverage
-└── cli.py         88% coverage
-```
+## Platform Support
 
-## 🤝 Contributing
+| Operating System | Python Versions | Architecture |
+|-----------------|-----------------|--------------|
+| Ubuntu Linux (20.04, 22.04, 24.04) | 3.8 - 3.12 | x86_64, ARM64 |
+| Windows (10, 11, Server 2022) | 3.8 - 3.12 | x86_64 |
+| macOS (Monterey, Ventura, Sonoma) | 3.8 - 3.12 | x86_64, ARM64 |
 
-Contributions are welcome! Especially in:
+## Contributing
 
-- 🐛 **Bug reports** - Open an issue with reproduction steps
-- 💡 **Feature requests** - Pascal VOC format, polygon support
-- 📚 **Documentation** - Examples, tutorials, use cases
-- 🌍 **Translations** - CLI output in other languages
+Contributions are welcome. Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Install development dependencies (`pip install -e .[dev]`)
+4. Make your changes
+5. Run tests (`pytest tests/`)
+6. Format code (`black annot_utils/`)
+7. Commit your changes (`git commit -m 'Add amazing feature'`)
+8. Push to the branch (`git push origin feature/amazing-feature`)
+9. Open a Pull Request
 
 ### Development Setup
 
 ```bash
-# Clone your fork
 git clone https://github.com/joakimtech/annot-utils.git
 cd annot-utils
-
-# Install with dev dependencies
 pip install -e .[dev]
-
-# Run tests
-pytest tests/ --cov=annot_utils
-
-# Format code
-black annot_utils/
-
-# Run linting
-flake8 annot_utils/
+pytest tests/
 ```
 
-## 📄 License
+## Testing
 
-MIT License - see [LICENSE](LICENSE) file for details.
+Run the test suite:
 
-## 🙏 Acknowledgments
+```bash
+# Run all tests
+pytest tests/
 
-- Built with [Click](https://click.palletsprojects.com/) - CLI framework
-- IoU calculations by [Shapely](https://shapely.readthedocs.io/)
-- Inspired by COCO and YOLO annotation standards
+# Run with coverage report
+pytest tests/ --cov=annot_utils --cov-report=html
 
-## 📞 Contact & Support
+# Run specific test file
+pytest tests/test_converter.py
+```
 
-- **Author**: [joakimtech](https://github.com/joakimtech)
-- **Issues**: [GitHub Issues](https://github.com/joakimtech/annot-utils/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/joakimtech/annot-utils/discussions)
+## Docker Support
 
-## ⭐ Show Your Support
+Build the Docker image:
 
-If this tool helps you, please consider:
-- ⭐ Starring the repository
-- 🐛 Reporting bugs you find
-- 💡 Suggesting new features
-- 🔀 Contributing code
+```bash
+docker build -t annot-utils .
+```
 
----
+Run in container:
 
-**Built with ❤️ for the computer vision community**
+```bash
+docker run annot-utils convert --from coco --to yolo --input /data/annotations.json --output /output/
+```
 
-[Report Bug](https://github.com/joakimtech/annot-utils/issues) · [Request Feature](https://github.com/joakimtech/annot-utils/issues) · [Star on GitHub](https://github.com/joakimtech/annot-utils)
+## Troubleshooting
+
+### Common Issues
+
+**Issue: Module not found after installation**
+```bash
+pip install --upgrade annot-utils
+```
+
+**Issue: Permission denied when running commands**
+```bash
+# On Unix/macOS
+chmod +x /path/to/annot-utils
+
+# On Windows, run as administrator
+```
+
+**Issue: Images not found during validation**
+- Ensure --image-dir path is correct
+- Check that image filenames match those in annotation files
+- Supported formats: .jpg, .jpeg, .png, .bmp
+
+## Roadmap
+
+Future enhancements planned:
+
+- Pascal VOC format support
+- CVAT XML format support
+- Rotated bounding boxes (OBB)
+- Polygon annotation support
+- Web-based visualization dashboard
+- Parallel processing for large datasets
+- Label Studio integration
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Author
+
+Joakim Tech - [GitHub](https://github.com/joakimtech)
+
+## Acknowledgments
+
+- COCO API for annotation format specification
+- Shapely library for geometric computations
+- Click framework for CLI interface
+- Open source community for testing and contributions
+
+## Support
+
+- Documentation: [GitHub Repository](https://github.com/joakimtech/annot-utils)
+- Issue Tracker: [GitHub Issues](https://github.com/joakimtech/annot-utils/issues)
+- Discussions: [GitHub Discussions](https://github.com/joakimtech/annot-utils/discussions)
 ```
 
